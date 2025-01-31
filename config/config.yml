@@ -1,0 +1,34 @@
+# GDAS Processing Configuration
+
+# Processing dates (required)
+start_date: "2024-01-01"  # Format: YYYY-MM-DD
+end_date: "2024-01-03"    # Same as start_date for single date
+
+# Input/Output paths
+input_dir: "input"    # Directory containing input files
+output_dir: "output"  # Directory to save output files
+
+# Grid specifications
+nlat: 720   # number of latitude points
+nlon: 1440  # number of longitude points
+lat_border: 0.125 # 1/2 reoslution of the file (0.25)
+
+# Processing options
+use_prev_date: true
+create_full_files: false
+
+# GDAS specific settings
+gdas:
+  base_url: "https://noaa-gfs-bdp-pds.s3.amazonaws.com"
+  file_pattern: "gfs.t{hour:02d}z.pgrb2.0p25.anl"
+  hours: [12] # this can be an array [0, 6, 12, 18] or a single value [12]
+  max_workers: 4
+
+# Output format options
+output_formats:
+  netcdf: true
+  dat: true  # Enable .dat file output
+
+# Output options
+combine_output: true  # Whether to combine .dat files after processing
+combined_file: "gdas_cmaq_combined.dat"  # Name of combined output file
