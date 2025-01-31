@@ -1,20 +1,27 @@
-import os
-import sys
-import yaml
-import logging
 import argparse
+import logging
 import traceback
-from pathlib import Path
-from typing import List, Tuple, Dict, Optional
-import requests
 from datetime import datetime, timedelta, date
+from pathlib import Path
+from typing import List, Dict, Optional
 import numpy as np
+import requests
 import xarray as xr
-import grib2io
+import yaml
 from netCDF4 import Dataset
 import concurrent.futures
-from functools import partial
-from tqdm import tqdm
+
+# Make tqdm optional
+try:
+    from tqdm import tqdm
+    has_tqdm = True
+except ImportError:
+    has_tqdm = False
+    def tqdm(iterable, **kwargs):
+        total = kwargs.get('total', '?')
+        desc = kwargs.get('desc', '')
+        logger.info(f"{desc} - Starting process with {total} items")
+        return iterable
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -500,11 +507,20 @@ class GDASProcessor:
                 )
 
             downloaded_files = []
-            for future in tqdm(concurrent.futures.as_completed(futures),
-                             total=len(futures),
-                             desc="Downloading GDAS data"):
+            future_iterator = concurrent.futures.as_completed(futures)
+
+            if has_tqdm:
+                future_iterator = tqdm(future_iterator,
+                                     total=len(futures),
+                                     desc="Downloading GDAS data")
+            else:
+                logger.info(f"Downloading {len(futures)} GDAS files...")
+
+            for future in future_iterator:
                 if future.result():
                     downloaded_files.append(future.result())
+                    if not has_tqdm:
+                        logger.info(f"Downloaded {len(downloaded_files)}/{len(futures)} files")
 
         return sorted(existing_files + downloaded_files)
 
