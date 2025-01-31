@@ -20,7 +20,24 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 def parse_args():
-    """Parse command line arguments"""
+    """Parse command line arguments for GDAS data processing.
+
+    Returns:
+        argparse.Namespace: Parsed command line arguments with the following fields:
+            - config (str): Path to YAML configuration file
+            - start_date (str): Start date in YYYY-MM-DD format
+            - end_date (str): End date in YYYY-MM-DD format
+            - input_dir (str): Input directory for GDAS files
+            - output_dir (str): Output directory for processed files
+            - nlat (int): Number of latitude points
+            - nlon (int): Number of longitude points
+            - lat_border (float): Latitude border in degrees
+            - use_prev_date (bool): Whether to use previous date for missing values
+            - create_full_files (bool): Whether to create full resolution output files
+            - verbose (bool): Enable verbose logging
+            - download (bool): Whether to download GDAS data
+            - max_workers (int): Maximum number of parallel downloads
+    """
     parser = argparse.ArgumentParser(
         description='Process GDAS data for CMAQ model',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -80,7 +97,20 @@ def parse_args():
     return parser.parse_args()
 
 def load_config(args):
-    """Load and merge configuration from YAML and command line"""
+    """Load and merge configuration from YAML file and command line arguments.
+
+    Handles date parsing, validation, and command line overrides of config values.
+
+    Args:
+        args (argparse.Namespace): Parsed command line arguments
+
+    Returns:
+        dict: Merged configuration dictionary with validated settings
+
+    Raises:
+        ValueError: If required date parameters are missing
+        yaml.YAMLError: If YAML config file is invalid
+    """
     # Load YAML config
     with open(args.config) as f:
         config = yaml.safe_load(f)
@@ -113,15 +143,32 @@ def load_config(args):
     return config
 
 class GDASProcessor:
-    """Process GDAS data for CMAQ model"""
+    """Process GDAS grib2 data files for CMAQ model integration.
+
+    This class handles reading GDAS grib2 files, extracting total column ozone data,
+    interpolating to a specified grid, and writing output in both CMAQ-ready netCDF
+    and ASCII formats.
+
+    Attributes:
+        config (dict): Configuration dictionary containing processing parameters
+        lats (numpy.ndarray): Latitude points for output grid
+        lons (numpy.ndarray): Longitude points for output grid
+        coords (dict): Coordinate dictionary for interpolation
+    """
 
     @staticmethod
     def wrap_longitudes(lons):
-        """For longitudes that may be in [0, 360) format, return in [-180, 180) format.
+        """Convert longitudes from [0, 360) format to [-180, 180) format.
 
-        Parameters
-        ----------
-        lons : array-like
+        Args:
+            lons (numpy.ndarray): Array of longitude values
+
+        Returns:
+            numpy.ndarray: Converted longitude values
+
+        Example:
+            >>> GDASProcessor.wrap_longitudes(np.array([350, 10]))
+            array([-10, 10])
         """
         return (lons + 180) % 360 - 180
 
@@ -155,7 +202,22 @@ class GDASProcessor:
         }
 
     def read_gdas_file(self, filename: str) -> xr.Dataset:
-        """Read GDAS grib2 file and extract total column ozone"""
+        """Read and process a GDAS grib2 file to extract total column ozone.
+
+        Args:
+            filename (str): Path to GDAS grib2 file
+
+        Returns:
+            xarray.Dataset: Dataset containing interpolated total column ozone data
+
+        Raises:
+            Exception: If file reading or processing fails
+
+        Notes:
+            - Uses grib2io backend for efficient reading
+            - Automatically handles longitude wrapping and grid interpolation
+            - Returns data interpolated to the configured output grid
+        """
         try:
             # Use xarray with grib2io backend and filter for total ozone
             filters = dict(typeOfFirstFixedSurface=200)  # Filter for column ozone
@@ -198,7 +260,20 @@ class GDASProcessor:
         return ds
 
     def write_cmaq_format(self, date: date, data: np.ndarray):
-        """Write CMAQ format output files using netCDF4 following IOAPI conventions"""
+        """Write data in CMAQ-compatible netCDF format following IOAPI conventions.
+
+        Creates a CMAQ-ready netCDF file with proper IOAPI attributes and variables.
+
+        Args:
+            date (datetime.date): Date of the data
+            data (numpy.ndarray): 2D array of ozone column data
+
+        Notes:
+            - Creates IOAPI-compliant netCDF files
+            - Sets required global attributes and dimensions
+            - Includes proper time flags and variable metadata
+            - Output filename format: gdas_cmaq_YYYYMMDD.nc
+        """
         outfile = Path(self.config['output_dir']) / f"gdas_cmaq_{date:%Y%m%d}.nc"
 
         # Calculate IOAPI date format (YYYYDDD)
@@ -373,7 +448,24 @@ class GDASProcessor:
             return None
 
     def download_gdas_data(self, start_date: str, end_date: str, max_workers: int = 4) -> List[Path]:
-        """Download GDAS data for specified date range"""
+        """Download GDAS grib2 files for a specified date range.
+
+        Downloads missing files from NOAA's AWS S3 bucket using parallel requests.
+
+        Args:
+            start_date (str): Start date in YYYY-MM-DD format
+            end_date (str): End date in YYYY-MM-DD format
+            max_workers (int, optional): Maximum number of concurrent downloads. Defaults to 4.
+
+        Returns:
+            List[Path]: List of paths to all available files (downloaded + existing)
+
+        Notes:
+            - Skips files that already exist locally
+            - Uses ThreadPoolExecutor for parallel downloads
+            - Shows progress bar during downloads
+            - Handles failed downloads gracefully
+        """
         current = datetime.strptime(start_date, '%Y-%m-%d')
         end = datetime.strptime(end_date, '%Y-%m-%d')
 
@@ -438,11 +530,20 @@ class GDASProcessor:
             current += timedelta(days=1)
 
 def combine_dat_files(directory: Path, output_file: Path):
-    """Combine multiple .dat files into a single file
+    """Combine multiple daily .dat files into a single combined file.
 
     Args:
-        directory: Directory containing .dat files
-        output_file: Path to output combined file
+        directory (Path): Directory containing daily .dat files
+        output_file (Path): Path where combined file should be written
+
+    Notes:
+        - Preserves header from first file
+        - Maintains chronological order of data
+        - Assumes consistent format across input files
+        - Skips duplicate headers from individual files
+
+    Example:
+        >>> combine_dat_files(Path('./output'), Path('./output/combined.dat'))
     """
     # Find all .dat files in directory
     dat_files = sorted(directory.glob('gdas_cmaq_*.dat'))
@@ -477,7 +578,18 @@ def combine_dat_files(directory: Path, output_file: Path):
     logger.info(f"Successfully created combined file: {output_file}")
 
 def main():
-    """Main program entry point"""
+    """Main program entry point for GDAS data processing.
+
+    Handles:
+        1. Command line argument parsing
+        2. Configuration loading and validation
+        3. Optional GDAS data downloading
+        4. Processing of single date or date range
+        5. Optional combination of output files
+
+    Raises:
+        Various exceptions which are logged with tracebacks
+    """
     args = parse_args()
     config = load_config(args)
     processor = GDASProcessor(config)
