@@ -104,7 +104,10 @@ def parse_args():
     return parser.parse_args()
 
 def load_config(args):
-    """Load and merge configuration from YAML file and command line arguments.
+    """
+    :no-index:
+
+    Load and merge configuration from YAML file and command line arguments.
 
     Handles date parsing, validation, and command line overrides of config values.
 
@@ -150,7 +153,10 @@ def load_config(args):
     return config
 
 class GDASProcessor:
-    """Process GDAS grib2 data files for CMAQ model integration.
+    """
+    :no-index:
+
+    Process GDAS grib2 data files for CMAQ model integration.
 
     This class handles reading GDAS grib2 files, extracting total column ozone data,
     interpolating to a specified grid, and writing output in both CMAQ-ready netCDF
@@ -165,7 +171,10 @@ class GDASProcessor:
 
     @staticmethod
     def wrap_longitudes(lons):
-        """Convert longitudes from [0, 360) format to [-180, 180) format.
+        """
+        :no-index:
+
+        Convert longitudes from [0, 360) format to [-180, 180) format.
 
         Args:
             lons (numpy.ndarray): Array of longitude values
@@ -187,7 +196,11 @@ class GDASProcessor:
         self.setup_grid()
 
     def validate_config(self):
-        """Validate configuration parameters"""
+        """
+        :no-index:
+
+        Validate configuration parameters
+        """
         required = ['input_dir', 'output_dir', 'date', 'nlat', 'nlon',
                    'lat_border', 'use_prev_date', 'create_full_files']
         missing = [key for key in required if key not in self.config]
@@ -195,7 +208,11 @@ class GDASProcessor:
             raise ValueError(f"Missing required config parameters: {missing}")
 
     def setup_grid(self):
-        """Setup the lat/lon grid coordinates"""
+        """
+        :no-index:
+
+        Setup the lat/lon grid coordinates
+        """
         lat_step = (180.0 - 2*self.config['lat_border']) / (self.config['nlat'] - 1)
         self.lats = np.linspace(-90.0 + self.config['lat_border'],
                               90.0 - self.config['lat_border'],
@@ -209,7 +226,10 @@ class GDASProcessor:
         }
 
     def read_gdas_file(self, filename: str) -> xr.Dataset:
-        """Read and process a GDAS grib2 file to extract total column ozone.
+        """
+        :no-index:
+
+        Read and process a GDAS grib2 file to extract total column ozone.
 
         Args:
             filename (str): Path to GDAS grib2 file
@@ -249,7 +269,10 @@ class GDASProcessor:
             raise
 
     def fill_missing_values(self, ds: xr.Dataset) -> xr.Dataset:
-        """Fill missing values in Dataset
+        """
+        :no-index:
+
+        Fill missing values in Dataset
 
         Args:
             ds: Dataset containing data to fill
@@ -267,7 +290,10 @@ class GDASProcessor:
         return ds
 
     def write_cmaq_format(self, date: date, data: np.ndarray):
-        """Write data in CMAQ-compatible netCDF format following IOAPI conventions.
+        """
+        :no-index:
+
+        Write data in CMAQ-compatible netCDF format following IOAPI conventions.
 
         Creates a CMAQ-ready netCDF file with proper IOAPI attributes and variables.
 
@@ -346,7 +372,11 @@ class GDASProcessor:
             nc.FILEDESC = 'CMAQ subset of OMI Satellite Observations'
 
     def write_dat_format(self, date: date, data: np.ndarray):
-        """Write ASCII .dat format output files following CMAQ OMI format"""
+        """
+        :no-index:
+
+        Write ASCII .dat format output files following CMAQ OMI format
+        """
         outfile = Path(self.config['output_dir']) / f"gdas_cmaq_{date:%Y%m%d}.dat"
 
         year_frac = date.year + (date.timetuple().tm_yday - 1) / 365.0
@@ -379,7 +409,11 @@ class GDASProcessor:
         logger.info(f"Successfully wrote ASCII file: {outfile}")
 
     def process_files(self):
-        """Process GDAS data files for a single day"""
+        """
+        :no-index:
+
+        Process GDAS data files for a single day
+        """
         date = self.config['date']
         input_dir = Path(self.config['input_dir'])
 
@@ -455,7 +489,10 @@ class GDASProcessor:
             return None
 
     def download_gdas_data(self, start_date: str, end_date: str, max_workers: int = 4) -> List[Path]:
-        """Download GDAS grib2 files for a specified date range.
+        """
+        :no-index:
+
+        Download GDAS grib2 files for a specified date range.
 
         Downloads missing files from NOAA's AWS S3 bucket using parallel requests.
 
@@ -525,7 +562,10 @@ class GDASProcessor:
         return sorted(existing_files + downloaded_files)
 
     def process_date_range(self, start_date: str, end_date: str):
-        """Process GDAS data files for a date range
+        """
+        :no-index:
+
+        Process GDAS data files for a date range
 
         Args:
             start_date: Start date in YYYY-MM-DD format

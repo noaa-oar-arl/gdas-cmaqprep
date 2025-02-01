@@ -1,5 +1,5 @@
 GDAS CMAQ Preprocessor Documentation
-==================================
+====================================
 
 .. toctree::
    :maxdepth: 2
@@ -11,6 +11,7 @@ GDAS CMAQ Preprocessor Documentation
    api
    contributing
    license
+   modules
 
 Overview
 --------
@@ -28,7 +29,7 @@ Features
 * Configurable via YAML configuration files
 
 Quick Start
-----------
+-----------
 
 1. Install the package::
 
@@ -37,9 +38,15 @@ Quick Start
 2. Create a configuration file (config.yml)
 3. Run the processor::
 
-    python -m gdas_cmaqprep -c config.yml
+    python src/create_gdas_cmaq_input.py --config config.yml
 
 For more detailed information, please see the :doc:`usage` and :doc:`configuration` pages.
+
+License
+-------
+
+.. include:: ../../LICENSE
+   :literal:
 
 Indices and tables
 ==================

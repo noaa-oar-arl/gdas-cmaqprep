@@ -4,8 +4,8 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="gdas-cmaqprep",
-    version="0.1.0",
+    name="gdas_cmaqprep",
+    version="1.0.0",
     author="NOAA Air Resources Laboratory",
     author_email="",
     description="A tool for processing GDAS data for CMAQ model",
@@ -26,12 +26,12 @@ setup(
     ],
     python_requires=">=3.8",
     install_requires=[
-        "numpy>=1.20.0",
-        "xarray>=0.16.0",
-        "netCDF4>=1.5.7",
-        "grib2io>=1.0.0",
-        "pyyaml>=5.4.1",
-        "requests>=2.25.1",
+        "numpy",
+        "xarray",
+        "netCDF4",
+        "pyyaml",
+        "requests",
+        "tqdm"
     ],
     extras_require={
         "dev": [

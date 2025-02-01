@@ -8,11 +8,27 @@ author = 'NOAA Air Resources Laboratory'
 
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    "sphinx_autosummary_accessors",
+    'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
     'sphinx.ext.intersphinx',
+    "sphinx.ext.extlinks",
+    "sphinx.ext.linkcode",
     'myst_parser'
 ]
+
+extlinks = {
+    "issue": ("https://github.com/noaa-oar-arl/gdas_cmaqprep/issues/%s", "GH"),
+    "pull": ("https://github.com/noaa-oar-arl/gdas_cmaqprep/pull/%s", "PR"),
+}
+
+autosummary_generate = True  # default in Sphinx v4
+autodoc_default_options = {
+    "members": True,
+    "special-members": "__init__",
+}
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
