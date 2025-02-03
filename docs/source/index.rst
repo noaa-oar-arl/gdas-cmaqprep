@@ -38,7 +38,7 @@ Quick Start
 2. Create a configuration file (config.yml)
 3. Run the processor::
 
-    python src/create_gdas_cmaq_input.py --config config.yml
+    gdas-cmaqprep --config config.yml
 
 For more detailed information, please see the :doc:`usage` and :doc:`configuration` pages.
 
