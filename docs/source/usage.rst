@@ -6,7 +6,7 @@ Basic Usage
 
 The basic usage pattern is::
 
-    python src/create_gdas_cmaq_input.py --config config.yml --start-date YYYY-MM-DD --end-date YYYY-MM-DD
+    gdas-cmaqprep --config config.yml --start-date YYYY-MM-DD --end-date YYYY-MM-DD
 
 Command Line Options
 --------------------
@@ -55,12 +55,12 @@ Examples
 
 1. Process a single day::
 
-    python src/create_gdas_cmaq_input.py -c config.yml --start-date 2024-01-01
+    gdas-cmaqprep -c config.yml --start-date 2024-01-01
 
 2. Process a date range with downloads::
 
-    python src/create_gdas_cmaq_input.py -c config.yml --start-date 2024-01-01 --end-date 2024-01-31 --download
+    gdas-cmaqprep -c config.yml --start-date 2024-01-01 --end-date 2024-01-31 --download
 
 3. Override grid resolution::
 
-    python src/create_gdas_cmaq_input.py -c config.yml --start-date 2024-01-01 --nlat 180 --nlon 360
+    gdas-cmaqprep -c config.yml --start-date 2024-01-01 --nlat 180 --nlon 360

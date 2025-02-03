@@ -25,7 +25,7 @@ Fork, then clone the repo:
 
 .. code-block:: bash
 
-    git clone git@github.com:your-username/gdas_cmaqprep.git
+    git clone git@github.com:your-username/gdas-cmaqprep.git
 
 Pull Request Process
 --------------------
@@ -110,8 +110,8 @@ References
 ----------
 
 .. _BSD 3-Clause License: https://opensource.org/licenses/BSD-3-Clause
-.. _issue tracker: https://github.com/noaa-arl/gdas_cmaqprep/issues
-.. _opening a new issue: https://github.com/noaa-arl/gdas_cmaqprep/issues/new
+.. _issue tracker: https://github.com/noaa-arl/gdas-cmaqprep/issues
+.. _opening a new issue: https://github.com/noaa-arl/gdas-cmaqprep/issues/new
 
 Questions?
 ----------

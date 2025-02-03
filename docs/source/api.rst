@@ -1,10 +1,7 @@
+.. module:: gdas_cmaqprep
+
 API Reference
 =============
-
-.. automodule:: src.create_gdas_omi
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 Main Classes
 ------------
@@ -12,7 +9,7 @@ Main Classes
 GDASProcessor
 ~~~~~~~~~~~~~
 
-.. autoclass:: src.create_gdas_omi.GDASProcessor
+.. autoclass:: gdas_cmaqprep.GDASProcessor
    :members:
    :undoc-members:
    :show-inheritance:
@@ -20,6 +17,6 @@ GDASProcessor
 Utility Functions
 -----------------
 
-.. autofunction:: src.create_gdas_omi.load_config
+.. autofunction:: gdas_cmaqprep.load_config
 
-.. autofunction:: src.create_gdas_omi.combine_dat_files
+.. autofunction:: gdas_cmaqprep.combine_dat_files

@@ -12,7 +12,6 @@ GDAS CMAQ Preprocessor Documentation
    api
    contributing
    license
-   modules
 
 Overview
 --------
@@ -34,12 +33,13 @@ Quick Start
 
 1. Install the package::
 
-    pip install gdas-cmaqprep
+    conda install -c conda-forge grib2io netcdf4 numpy pyyaml requests tqdm xarray
+    pip install gdas-cmaqprep --no-deps
 
 2. Create a configuration file (config.yml)
 3. Run the processor::
 
-    python src/create_gdas_cmaq_input.py --config config.yml
+    gdas-cmaqprep --config config.yml
 
 For more detailed information, please see the :doc:`usage` and :doc:`configuration` pages.
 

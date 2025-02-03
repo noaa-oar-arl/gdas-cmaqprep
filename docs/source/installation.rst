@@ -8,12 +8,12 @@ Core Requirements:
 ~~~~~~~~~~~~~~~~~~
 
 * Python 3.8+
-* numpy
 * grib2io
-* xarray
 * netCDF4
-* pyyaml
+* numpy
+* PyYAML
 * requests
+* xarray
 
 Optional Requirements:
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -27,7 +27,7 @@ To install the package:
 
 .. code-block:: bash
 
-    pip install -r requirements.txt
+    pip install gdas-cmaqprep
 
 Development Installation
 ------------------------
@@ -36,6 +36,6 @@ For development:
 
 .. code-block:: bash
 
-    git clone https://github.com/username/gdas_cmaqprep.git
-    cd gdas_cmaqprep
+    git clone https://github.com/username/gdas-cmaqprep.git
+    cd gdas-cmaqprep
     pip install -e .[dev]

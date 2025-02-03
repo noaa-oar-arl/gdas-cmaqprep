@@ -1,10 +1,10 @@
 Configuration
-============
+=============
 
 The GDAS CMAQ Preprocessor uses YAML configuration files for setup. Here's a complete reference of all available options.
 
 Basic Configuration
-------------------
+-------------------
 
 .. code-block:: yaml
 
@@ -30,10 +30,10 @@ Basic Configuration
       local_pattern: "gdas_{date:%Y%m%d}_{hour:02d}.grib2"
 
 Configuration Options
---------------------
+---------------------
 
 Input/Output Settings
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 input_dir
     Directory containing GDAS input files
@@ -42,7 +42,7 @@ output_dir
     Directory where processed files will be written
 
 Grid Settings
-~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 nlat
     Number of latitude points in output grid
@@ -54,7 +54,7 @@ lat_border
     Latitude border in degrees to avoid polar regions
 
 Processing Options
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 use_prev_date
     Whether to use previous date's data for missing values
@@ -66,7 +66,7 @@ combine_output
     Combine daily files into a single output file
 
 GDAS Settings
-~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 hours
     List of hours to process (typically [0, 6, 12, 18])
@@ -81,7 +81,7 @@ local_pattern
     Pattern for local GDAS files
 
 Example Configuration
---------------------
+---------------------
 
 .. code-block:: yaml
 

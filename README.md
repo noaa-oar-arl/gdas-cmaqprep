@@ -17,16 +17,16 @@ A Python tool for processing GDAS (Global Data Assimilation System) data for use
 
 ## Installation
 
-### Requirements
+### Using Conda (recommended)
 
-- Python 3.8 or later
-- grib2io
-- xarray
-- netCDF4
-- numpy
-- pyyaml
-- requests
-- tqdm
+This is recommended in order to get grib2io's C dependencies installed.
+
+After activating your Conda environment:
+
+```bash
+conda install -c conda-forge grib2io netcdf4 numpy pyyaml requests tqdm xarray
+pip install gdas-cmaqprep --no-deps
+```
 
 ### Using pip
 
@@ -37,8 +37,8 @@ pip install gdas-cmaqprep
 ### Development Installation
 
 ```bash
-git clone https://github.com/noaa-arl/gdas_cmaqprep.git
-cd gdas_cmaqprep
+git clone https://github.com/noaa-arl/gdas-cmaqprep.git
+cd gdas-cmaqprep
 pip install -e ".[dev]"
 ```
 
