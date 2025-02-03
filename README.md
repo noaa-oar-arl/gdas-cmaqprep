@@ -17,17 +17,6 @@ A Python tool for processing GDAS (Global Data Assimilation System) data for use
 
 ## Installation
 
-### Requirements
-
-- Python 3.8 or later
-- grib2io
-- xarray
-- netCDF4
-- numpy
-- pyyaml
-- requests
-- tqdm
-
 ### Using Conda (recommended)
 
 This is recommended in order to get grib2io's C dependencies installed.
