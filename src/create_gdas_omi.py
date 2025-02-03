@@ -124,8 +124,6 @@ def parse_args():
 
 def load_config(args):
     """
-    :no-index:
-
     Load and merge configuration from YAML file and command line arguments.
 
     Handles date parsing, validation, and command line overrides of config values.
@@ -176,8 +174,6 @@ def load_config(args):
 
 class GDASProcessor:
     """
-    :no-index:
-
     Process GDAS grib2 data files for CMAQ model integration.
 
     This class handles reading GDAS grib2 files, extracting total column ozone data,
@@ -194,8 +190,6 @@ class GDASProcessor:
     @staticmethod
     def wrap_longitudes(lons):
         """
-        :no-index:
-
         Convert longitudes from [0, 360) format to [-180, 180) format.
 
         Args:
@@ -219,8 +213,6 @@ class GDASProcessor:
 
     def validate_config(self):
         """
-        :no-index:
-
         Validate configuration parameters
         """
         required = [
@@ -239,8 +231,6 @@ class GDASProcessor:
 
     def setup_grid(self):
         """
-        :no-index:
-
         Setup the lat/lon grid coordinates
         """
         import numpy as np
@@ -256,8 +246,6 @@ class GDASProcessor:
 
     def read_gdas_file(self, filename: str) -> xarray.Dataset:
         """
-        :no-index:
-
         Read and process a GDAS grib2 file to extract total column ozone.
 
         Args:
@@ -298,8 +286,6 @@ class GDASProcessor:
 
     def fill_missing_values(self, ds: xarray.Dataset) -> xarray.Dataset:
         """
-        :no-index:
-
         Fill missing values in Dataset
 
         Args:
@@ -319,15 +305,13 @@ class GDASProcessor:
 
     def write_cmaq_format(self, date: date, data: numpy.ndarray):
         """
-        :no-index:
-
         Write data in CMAQ-compatible netCDF format following IOAPI conventions.
 
         Creates a CMAQ-ready netCDF file with proper IOAPI attributes and variables.
 
         Args:
-            date (datetime.date): Date of the data
-            data (array): 2D array of ozone column data
+            date: Date of the data
+            data: 2D array of ozone column data
 
         Notes:
             - Creates IOAPI-compliant netCDF files
@@ -403,8 +387,6 @@ class GDASProcessor:
 
     def write_dat_format(self, date: date, data):
         """
-        :no-index:
-
         Write ASCII .dat format output files following CMAQ OMI format
         """
         import numpy as np
@@ -442,8 +424,6 @@ class GDASProcessor:
 
     def process_files(self):
         """
-        :no-index:
-
         Process GDAS data files for a single day
         """
         import xarray as xr
@@ -527,8 +507,6 @@ class GDASProcessor:
         self, start_date: str, end_date: str, max_workers: int = 4
     ) -> List[Path]:
         """
-        :no-index:
-
         Download GDAS grib2 files for a specified date range.
 
         Downloads missing files from NOAA's AWS S3 bucket using parallel requests.
@@ -602,8 +580,6 @@ class GDASProcessor:
 
     def process_date_range(self, start_date: str, end_date: str):
         """
-        :no-index:
-
         Process GDAS data files for a date range
 
         Args:
