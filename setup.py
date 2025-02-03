@@ -26,12 +26,11 @@ setup(
     ],
     python_requires=">=3.8",
     install_requires=[
-        "numpy",
-        "xarray",
         "netCDF4",
-        "pyyaml",
+        "numpy",
         "requests",
-        "tqdm"
+        "PyYAML",
+        "xarray",
     ],
     extras_require={
         "dev": [
