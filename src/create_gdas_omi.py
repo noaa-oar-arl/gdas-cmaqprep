@@ -229,7 +229,7 @@ class GDASProcessor:
 
         Setup the lat/lon grid coordinates
         """
-        lat_step = (180.0 - 2 * self.config["lat_border"]) / (self.config["nlat"] - 1)
+        # lat_step = (180.0 - 2 * self.config["lat_border"]) / (self.config["nlat"] - 1)
         self.lats = np.linspace(
             -90.0 + self.config["lat_border"], 90.0 - self.config["lat_border"], self.config["nlat"]
         )
@@ -551,8 +551,8 @@ class GDASProcessor:
         # Download missing files
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = []
-            for date, hour in download_tasks:
-                futures.append(executor.submit(self._download_single_file, date, hour, outdir))
+            for date_, hour in download_tasks:
+                futures.append(executor.submit(self._download_single_file, date_, hour, outdir))
 
             downloaded_files = []
             future_iterator = concurrent.futures.as_completed(futures)
