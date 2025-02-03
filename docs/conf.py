@@ -20,8 +20,8 @@ extensions = [
 ]
 
 extlinks = {
-    "issue": ("https://github.com/noaa-oar-arl/gdas_cmaqprep/issues/%s", "GH"),
-    "pull": ("https://github.com/noaa-oar-arl/gdas_cmaqprep/pull/%s", "PR"),
+    "issue": ("https://github.com/noaa-oar-arl/gdas-cmaqprep/issues/%s", "GH"),
+    "pull": ("https://github.com/noaa-oar-arl/gdas-cmaqprep/pull/%s", "PR"),
 }
 
 autosummary_generate = True  # default in Sphinx v4

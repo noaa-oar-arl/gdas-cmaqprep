@@ -36,6 +36,6 @@ For development:
 
 .. code-block:: bash
 
-    git clone https://github.com/username/gdas_cmaqprep.git
-    cd gdas_cmaqprep
+    git clone https://github.com/username/gdas-cmaqprep.git
+    cd gdas-cmaqprep
     pip install -e .[dev]

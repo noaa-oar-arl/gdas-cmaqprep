@@ -4,14 +4,14 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="gdas_cmaqprep",
+    name="gdas-cmaqprep",
     version="1.0.0",
     author="NOAA Air Resources Laboratory",
     author_email="",
     description="A tool for processing GDAS data for CMAQ model",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/noaa-arl/gdas_cmaqprep",
+    url="https://github.com/noaa-arl/gdas-cmaqprep",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     classifiers=[
