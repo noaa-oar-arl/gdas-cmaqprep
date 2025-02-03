@@ -33,7 +33,8 @@ Quick Start
 
 1. Install the package::
 
-    pip install gdas-cmaqprep
+    conda install -c conda-forge grib2io netcdf4 numpy pyyaml requests tqdm xarray
+    pip install gdas-cmaqprep --no-deps
 
 2. Create a configuration file (config.yml)
 3. Run the processor::
