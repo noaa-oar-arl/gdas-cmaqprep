@@ -42,7 +42,7 @@ console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 
 
-def parse_args():
+def parse_args(argv=None):
     """Parse command line arguments for GDAS data processing.
 
     Returns:
@@ -119,7 +119,7 @@ def parse_args():
         "--max-workers", type=int, default=4, help="Maximum number of parallel downloads"
     )
 
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def load_config(args):
