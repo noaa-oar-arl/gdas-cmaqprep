@@ -8,12 +8,12 @@ Core Requirements:
 ~~~~~~~~~~~~~~~~~~
 
 * Python 3.8+
-* numpy
 * grib2io
-* xarray
 * netCDF4
-* pyyaml
+* numpy
+* PyYAML
 * requests
+* xarray
 
 Optional Requirements:
 ~~~~~~~~~~~~~~~~~~~~~~

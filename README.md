@@ -28,6 +28,17 @@ A Python tool for processing GDAS (Global Data Assimilation System) data for use
 - requests
 - tqdm
 
+### Using Conda (recommended)
+
+This is recommended in order to get grib2io's C dependencies installed.
+
+After activating your Conda environment:
+
+```bash
+conda install -c conda-forge grib2io netcdf4 numpy pyyaml requests tqdm xarray
+pip install gdas-cmaqprep --no-deps
+```
+
 ### Using pip
 
 ```bash
