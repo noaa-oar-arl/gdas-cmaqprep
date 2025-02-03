@@ -9,7 +9,6 @@ author = 'NOAA Air Resources Laboratory'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
-    "sphinx_autosummary_accessors",
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
