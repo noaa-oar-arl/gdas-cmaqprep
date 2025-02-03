@@ -1,11 +1,6 @@
 API Reference
 =============
 
-.. automodule:: src.create_gdas_omi
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Main Classes
 ------------
 

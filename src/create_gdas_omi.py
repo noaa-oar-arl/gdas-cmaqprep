@@ -1,15 +1,15 @@
+from __future__ import annotations
+
 import argparse
 import logging
 import traceback
-from datetime import datetime, timedelta, date
+from datetime import date, datetime, timedelta
 from pathlib import Path
-from typing import List, Dict, Optional
-import numpy as np
-import requests
-import xarray as xr
-import yaml
-from netCDF4 import Dataset
-import concurrent.futures
+from typing import List, Dict, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import numpy
+    import xarray
 
 # Make tqdm optional
 try:
@@ -140,6 +140,8 @@ def load_config(args):
         ValueError: If required date parameters are missing
         yaml.YAMLError: If YAML config file is invalid
     """
+    import yaml
+
     # Load YAML config
     with open(args.config) as f:
         config = yaml.safe_load(f)
@@ -241,6 +243,8 @@ class GDASProcessor:
 
         Setup the lat/lon grid coordinates
         """
+        import numpy as np
+
         # lat_step = (180.0 - 2 * self.config["lat_border"]) / (self.config["nlat"] - 1)
         self.lats = np.linspace(
             -90.0 + self.config["lat_border"], 90.0 - self.config["lat_border"], self.config["nlat"]
@@ -250,7 +254,7 @@ class GDASProcessor:
         # Create coordinate dictionary for interpolation
         self.coords = {"latitude": self.lats, "longitude": self.lons}
 
-    def read_gdas_file(self, filename: str) -> xr.Dataset:
+    def read_gdas_file(self, filename: str) -> xarray.Dataset:
         """
         :no-index:
 
@@ -270,6 +274,8 @@ class GDASProcessor:
             - Automatically handles longitude wrapping and grid interpolation
             - Returns data interpolated to the configured output grid
         """
+        import xarray as xr
+
         try:
             # Use xarray with grib2io backend and filter for total ozone
             filters = dict(typeOfFirstFixedSurface=200)  # Filter for column ozone
@@ -290,7 +296,7 @@ class GDASProcessor:
             logger.debug(traceback.format_exc())
             raise
 
-    def fill_missing_values(self, ds: xr.Dataset) -> xr.Dataset:
+    def fill_missing_values(self, ds: xarray.Dataset) -> xarray.Dataset:
         """
         :no-index:
 
@@ -311,7 +317,7 @@ class GDASProcessor:
 
         return ds
 
-    def write_cmaq_format(self, date: date, data: np.ndarray):
+    def write_cmaq_format(self, date: date, data: numpy.ndarray):
         """
         :no-index:
 
@@ -321,7 +327,7 @@ class GDASProcessor:
 
         Args:
             date (datetime.date): Date of the data
-            data (numpy.ndarray): 2D array of ozone column data
+            data (array): 2D array of ozone column data
 
         Notes:
             - Creates IOAPI-compliant netCDF files
@@ -329,6 +335,8 @@ class GDASProcessor:
             - Includes proper time flags and variable metadata
             - Output filename format: gdas_cmaq_YYYYMMDD.nc
         """
+        from netCDF4 import Dataset
+
         outfile = Path(self.config["output_dir"]) / f"gdas_cmaq_{date:%Y%m%d}.nc"
 
         # Calculate IOAPI date format (YYYYDDD)
@@ -393,12 +401,14 @@ class GDASProcessor:
             # Add file description
             nc.FILEDESC = "CMAQ subset of OMI Satellite Observations"
 
-    def write_dat_format(self, date: date, data: np.ndarray):
+    def write_dat_format(self, date: date, data):
         """
         :no-index:
 
         Write ASCII .dat format output files following CMAQ OMI format
         """
+        import numpy as np
+
         outfile = Path(self.config["output_dir"]) / f"gdas_cmaq_{date:%Y%m%d}.dat"
 
         year_frac = date.year + (date.timetuple().tm_yday - 1) / 365.0
@@ -436,6 +446,8 @@ class GDASProcessor:
 
         Process GDAS data files for a single day
         """
+        import xarray as xr
+
         date = self.config["date"]
         input_dir = Path(self.config["input_dir"])
 
@@ -482,6 +494,8 @@ class GDASProcessor:
 
     def _download_single_file(self, date: datetime, hour: int, outdir: Path) -> Optional[Path]:
         """Download a single GDAS file"""
+        import requests
+
         file_pattern = self.config["gdas"]["file_pattern"]
         filename = file_pattern.format(hour=hour)
         outfile = outdir / f"gdas_{date:%Y%m%d}_{hour:02d}.grib2"
@@ -533,6 +547,8 @@ class GDASProcessor:
             - Shows progress bar during downloads
             - Handles failed downloads gracefully
         """
+        import concurrent.futures
+
         current = datetime.strptime(start_date, "%Y-%m-%d")
         end = datetime.strptime(end_date, "%Y-%m-%d")
 

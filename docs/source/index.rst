@@ -12,7 +12,6 @@ GDAS CMAQ Preprocessor Documentation
    api
    contributing
    license
-   modules
 
 Overview
 --------
