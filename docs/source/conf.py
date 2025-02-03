@@ -11,7 +11,6 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.extlinks",
     # "sphinx.ext.linkcode",
-    "myst_parser",
 ]
 
 extlinks = {
