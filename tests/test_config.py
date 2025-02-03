@@ -1,6 +1,7 @@
+from datetime import datetime
+
 import pytest
 from gdas_cmaqprep.config import load_config
-from datetime import datetime
 
 
 def test_load_config(temp_config_file):

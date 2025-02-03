@@ -5,7 +5,7 @@ import logging
 import traceback
 from datetime import date, datetime, timedelta
 from pathlib import Path
-from typing import List, Dict, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 if TYPE_CHECKING:
     import numpy
