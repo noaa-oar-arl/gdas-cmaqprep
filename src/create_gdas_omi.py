@@ -26,8 +26,20 @@ except ImportError:
         return iterable
 
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
+# Create a custom logger for this module
+logger = logging.getLogger("gdas_cmaqprep")
+logger.setLevel(logging.INFO)
+
+# Create console handler with a specific log format
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+console_handler.setFormatter(formatter)
+
+# Add the console handler to the logger
+logger.addHandler(console_handler)
 
 
 def parse_args():

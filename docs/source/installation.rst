@@ -27,7 +27,7 @@ To install the package:
 
 .. code-block:: bash
 
-    pip install -r requirements.txt
+    pip install gdas-cmaqprep
 
 Development Installation
 ------------------------
