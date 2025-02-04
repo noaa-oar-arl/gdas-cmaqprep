@@ -37,7 +37,7 @@ pip install gdas-cmaqprep
 ### Development Installation
 
 ```bash
-git clone https://github.com/noaa-arl/gdas-cmaqprep.git
+git clone https://github.com/noaa-oar-arl/gdas-cmaqprep.git
 cd gdas-cmaqprep
 pip install -e ".[dev]"
 ```

@@ -110,8 +110,8 @@ References
 ----------
 
 .. _BSD 3-Clause License: https://opensource.org/licenses/BSD-3-Clause
-.. _issue tracker: https://github.com/noaa-arl/gdas-cmaqprep/issues
-.. _opening a new issue: https://github.com/noaa-arl/gdas-cmaqprep/issues/new
+.. _issue tracker: https://github.com/noaa-oar-arl/gdas-cmaqprep/issues
+.. _opening a new issue: https://github.com/noaa-oar-arl/gdas-cmaqprep/issues/new
 
 Questions?
 ----------
