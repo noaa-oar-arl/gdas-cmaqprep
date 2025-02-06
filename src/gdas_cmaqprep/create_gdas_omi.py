@@ -60,6 +60,7 @@ def parse_args(argv=None):
             - verbose (bool): Enable verbose logging
             - download (bool): Whether to download GDAS data
             - max_workers (int): Maximum number of parallel downloads
+            - resolution (str): GDAS data resolution in degrees
     """
     parser = argparse.ArgumentParser(
         description="Process GDAS data for CMAQ model",
@@ -119,6 +120,13 @@ def parse_args(argv=None):
         "--max-workers", type=int, default=4, help="Maximum number of parallel downloads"
     )
 
+    parser.add_argument(
+        "--resolution",
+        choices=["0.25", "0.50", "1.00"],
+        default="0.25",
+        help="GDAS data resolution in degrees",
+    )
+
     return parser.parse_args(argv)
 
 
@@ -168,6 +176,10 @@ def load_config(args):
         if value is not None and key in config:
             config[key] = value
             logger.info(f"Overriding {key} from command line: {value}")
+
+    # Set default resolution if not in config
+    if "resolution" not in config:
+        config["resolution"] = "0.25"
 
     return config
 
@@ -434,13 +446,12 @@ class GDASProcessor:
         input_dir = Path(self.config["input_dir"])
 
         files = []
-        pattern = self.config["gdas"].get("local_pattern", "gdas_{date:%Y%m%d}_{hour:02d}.grib2")
+        resolution = self.config.get("resolution", "0.25")
+        res_str = f"0p{resolution.replace('.', '')}"
+        pattern = f"gfs.t*z.pgrb2.{res_str}.f000_{date:%Y%m%d}"  # Modified pattern
 
-        for hour in self.config["gdas"]["hours"]:
-            filename = pattern.format(date=date, hour=hour)
-            file_path = input_dir / filename
-            if file_path.exists():
-                files.append(file_path)
+        for file in input_dir.glob(pattern):
+            files.append(file)
 
         if not files:
             raise FileNotFoundError(
@@ -478,17 +489,24 @@ class GDASProcessor:
         """Download a single GDAS file"""
         import requests
 
+        # Get resolution and format for URL
+        resolution = self.config.get("resolution", "0.25")
+        res_str = f"0p{resolution.replace('.', '')}"  # Convert 0.25 to 0p25 format
+
         file_pattern = self.config["gdas"]["file_pattern"]
-        filename = file_pattern.format(hour=hour)
-        outfile = outdir / f"gdas_{date:%Y%m%d}_{hour:02d}.grib2"
+        filename = file_pattern.format(hour=hour, resolution=res_str)
+
+        # Save with date appended to filename
+        outfile = outdir / f"{filename}_{date:%Y%m%d}"
 
         # Skip if file already exists
         if outfile.exists():
             logger.debug(f"File already exists: {outfile}")
             return outfile
 
-        # Construct URL using AWS S3 pattern
-        url = f"{self.config['gdas']['base_url']}/gfs.{date:%Y%m%d}/" f"{hour:02d}/atmos/{filename}"
+        # Construct URL using AWS S3 pattern with resolution
+        url = (f"{self.config['gdas']['base_url']}/gfs.{date:%Y%m%d}/"
+               f"{hour:02d}/atmos/{filename}")
 
         logger.info(f"Downloading {url}")
 
