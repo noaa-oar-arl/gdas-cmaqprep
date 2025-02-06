@@ -287,11 +287,23 @@ class GDASProcessor:
             ds["x"] = lons
             ds["y"] = ds.latitude.values[:, 0]
             ds = ds.sortby('x')
+            ds = ds.sortby('y')
 
             logger.debug(f"Longitude range: {ds.x.min().item():.1f} to {ds.x.max().item():.1f}")
 
             # Interpolate to desired grid
-            return ds.interp(y=self.coords["latitude"], x=self.coords["longitude"])
+            if self.config["create_full_files"]:
+                self.coords['latitude'] = ds.y
+                self.coords["longitude"] = ds.x
+                self.coords['nlat'] = len(ds.y)
+                self.coords['nlon'] = len(ds.x)
+                self.lats = ds.y.values
+                self.lons = ds.x.values
+                print('here')
+                return ds
+            
+            else:
+                return ds.interp(y=self.coords["latitude"], x=self.coords["longitude"])
 
         except Exception as e:
             logger.error(f"Error reading file {filename}: {e}")
@@ -394,7 +406,7 @@ class GDASProcessor:
             ozone.var_desc = "OMI Ozone Column Density"
 
             # Write data
-            ozone[0, 0, :, :] = data
+            ozone[0, 0, :, :] = data.squeeze()
 
             # Add file description
             nc.FILEDESC = "CMAQ subset of OMI Satellite Observations"
@@ -404,10 +416,12 @@ class GDASProcessor:
         Write ASCII .dat format output files following CMAQ OMI format
         """
         import numpy as np
+        import calendar
 
         outfile = Path(self.config["output_dir"]) / f"gdas_cmaq_{date:%Y%m%d}.dat"
 
-        year_frac = date.year + (date.timetuple().tm_yday - 1) / 365.0
+        num_days = calendar.isleap(date.year) and 366 or 365
+        year_frac = round(date.year + (date.timetuple().tm_yday) / num_days, 4)
 
         # Write header
         with open(outfile, "w") as f:
@@ -417,7 +431,7 @@ class GDASProcessor:
             # Write column headers
             f.write("yeardate latitude  ")
             for lon in self.lons:
-                f.write(f"{lon:7.2f}  ")
+                f.write(f"{lon:7.1f}  ")
             f.write("\n")
 
             # Write data rows from north to south
@@ -431,7 +445,11 @@ class GDASProcessor:
                         f.write("     *")  # Missing value indicator
                     else:
                         value = int(round(data[i, j]))
-                        f.write(f"{value:6d}")
+                        if j == 0:
+                            f.write(f"{value:8d}")
+                        else:
+                            f.write(f"{value:9d}")
+                            
                 f.write("\n")
 
         logger.info(f"Successfully wrote ASCII file: {outfile}")
@@ -446,9 +464,9 @@ class GDASProcessor:
         input_dir = Path(self.config["input_dir"])
 
         files = []
-        resolution = self.config.get("resolution", "0.25")
-        res_str = f"0p{resolution.replace('.', '')}"
-        pattern = f"gfs.t*z.pgrb2.{res_str}.f000_{date:%Y%m%d}"  # Modified pattern
+        resolution = self.config['gdas']["resolution"]
+        res_str = f"{resolution.replace('.', 'p')}"
+        pattern = f"gfs.t*z.pgrb2.{res_str}.anl_{date:%Y%m%d}"  # Modified pattern
 
         for file in input_dir.glob(pattern):
             files.append(file)
@@ -472,7 +490,7 @@ class GDASProcessor:
 
         date = self.config["date"].date()
         data = daily_ds.values  # Get numpy array of data values
-
+        print(data.shape, len(self.lats), len(self.lons))
         logger.info(f"Writing netCDF file for {date}")
         self.write_cmaq_format(date, data)
 
