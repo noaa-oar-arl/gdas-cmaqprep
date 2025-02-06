@@ -269,10 +269,12 @@ class GDASProcessor:
             filters = dict(typeOfFirstFixedSurface=200)  # Filter for column ozone
             ds = xr.open_dataset(filename, engine="grib2io", filters=filters)["TOZNE"]
 
+
             # Get coordinates and wrap longitudes to [-180, 180]
             lons = self.wrap_longitudes(ds.longitude.values[0, :])
             ds["x"] = lons
             ds["y"] = ds.latitude.values[:, 0]
+            ds = ds.sortby('x')
 
             logger.debug(f"Longitude range: {ds.x.min().item():.1f} to {ds.x.max().item():.1f}")
 
@@ -401,9 +403,9 @@ class GDASProcessor:
             f.write(f"nlon      {len(self.lons)}\n")
 
             # Write column headers
-            f.write("yeardate latitude ")
+            f.write("yeardate latitude  ")
             for lon in self.lons:
-                f.write(f"{lon:7.2f}")
+                f.write(f"{lon:7.2f}  ")
             f.write("\n")
 
             # Write data rows from north to south
@@ -609,13 +611,9 @@ def combine_dat_files(directory: Path, output_file: Path):
         output_file (Path): Path where combined file should be written
 
     Notes:
-        - Preserves header from first file
+        - Preserves complete header including yeardate and latitude
         - Maintains chronological order of data
         - Assumes consistent format across input files
-        - Skips duplicate headers from individual files
-
-    Example:
-        >>> combine_dat_files(Path('./output'), Path('./output/combined.dat'))
     """
     # Find all .dat files in directory
     dat_files = sorted(directory.glob("gdas_cmaq_*.dat"))
@@ -627,14 +625,11 @@ def combine_dat_files(directory: Path, output_file: Path):
 
     # Read and combine files
     with open(output_file, "w") as outf:
-        # Copy header from first file (only need once)
+        # Copy complete header from first file
         with open(dat_files[0]) as f:
-            header_lines = []
-            for i in range(3):  # Read first 3 lines (header)
+            for i in range(3):  # Read all 3 header lines
                 line = f.readline()
-                if i < 2:  # Only write nlat/nlon lines
-                    outf.write(line)
-                header_lines.append(line)
+                outf.write(line)
 
         # Process all files
         for dat_file in dat_files:
