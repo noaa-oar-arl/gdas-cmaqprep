@@ -295,8 +295,6 @@ class GDASProcessor:
             if self.config["create_full_files"]:
                 self.coords['latitude'] = ds.y
                 self.coords["longitude"] = ds.x
-                self.coords['nlat'] = len(ds.y)
-                self.coords['nlon'] = len(ds.x)
                 self.lats = ds.y.values
                 self.lons = ds.x.values
                 return ds
