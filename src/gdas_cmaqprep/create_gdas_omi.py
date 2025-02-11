@@ -417,7 +417,7 @@ class GDASProcessor:
 
         outfile = Path(self.config["output_dir"]) / f"gdas_cmaq_{date:%Y%m%d}.dat"
 
-        num_days = calendar.isleap(date.year) and 366 or 365
+        num_days = 366 if calendar.isleap(date.year) else 365
         year_frac = round(date.year + (date.timetuple().tm_yday) / num_days, 4)
 
         # Write header
