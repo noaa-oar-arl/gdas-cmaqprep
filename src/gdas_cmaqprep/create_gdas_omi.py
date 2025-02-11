@@ -505,7 +505,7 @@ class GDASProcessor:
 
         # Get resolution and format for URL
         resolution = self.config.get("resolution", "0.25")
-        res_str = f"0p{resolution.replace('.', '')}"  # Convert 0.25 to 0p25 format
+        res_str = resolution.replace('.', 'p')  # Convert 0.25 to 0p25 format
 
         file_pattern = self.config["gdas"]["file_pattern"]
         filename = file_pattern.format(hour=hour, resolution=res_str)
