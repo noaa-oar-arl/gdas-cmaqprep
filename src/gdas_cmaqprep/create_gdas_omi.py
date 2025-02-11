@@ -299,7 +299,6 @@ class GDASProcessor:
                 self.coords['nlon'] = len(ds.x)
                 self.lats = ds.y.values
                 self.lons = ds.x.values
-                print('here')
                 return ds
             
             else:
