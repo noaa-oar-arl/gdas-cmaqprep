@@ -490,7 +490,7 @@ class GDASProcessor:
 
         date = self.config["date"].date()
         data = daily_ds.values  # Get numpy array of data values
-        print(data.shape, len(self.lats), len(self.lons))
+        
         logger.info(f"Writing netCDF file for {date}")
         self.write_cmaq_format(date, data)
 
