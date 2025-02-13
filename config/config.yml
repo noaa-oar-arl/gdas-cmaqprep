@@ -20,7 +20,7 @@ create_full_files: false
 # GDAS specific settings
 gdas:
   base_url: "https://noaa-gfs-bdp-pds.s3.amazonaws.com"
-  file_pattern: "gfs.t{hour:02d}z.pgrb2.0p25.anl"
+  file_pattern: "gfs.t{hour:02d}z.pgrb2.{resolution}.anl"
   hours: [12] # this can be an array [0, 6, 12, 18] or a single value [12]
   max_workers: 4
   resolution: "0.25"  # Can be 0.25, 0.50, or 1.00
