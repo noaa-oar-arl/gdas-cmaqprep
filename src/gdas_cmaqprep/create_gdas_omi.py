@@ -60,6 +60,7 @@ def parse_args(argv=None):
             - verbose (bool): Enable verbose logging
             - download (bool): Whether to download GDAS data
             - max_workers (int): Maximum number of parallel downloads
+            - resolution (str): GDAS data resolution in degrees
     """
     parser = argparse.ArgumentParser(
         description="Process GDAS data for CMAQ model",
@@ -119,6 +120,13 @@ def parse_args(argv=None):
         "--max-workers", type=int, default=4, help="Maximum number of parallel downloads"
     )
 
+    parser.add_argument(
+        "--resolution",
+        choices=["0.25", "0.50", "1.00"],
+        default="0.25",
+        help="GDAS data resolution in degrees",
+    )
+
     return parser.parse_args(argv)
 
 
@@ -168,6 +176,10 @@ def load_config(args):
         if value is not None and key in config:
             config[key] = value
             logger.info(f"Overriding {key} from command line: {value}")
+
+    # Set default resolution if not in config
+    if "resolution" not in config:
+        config["resolution"] = "0.25"
 
     return config
 
@@ -269,15 +281,26 @@ class GDASProcessor:
             filters = dict(typeOfFirstFixedSurface=200)  # Filter for column ozone
             ds = xr.open_dataset(filename, engine="grib2io", filters=filters)["TOZNE"]
 
+
             # Get coordinates and wrap longitudes to [-180, 180]
             lons = self.wrap_longitudes(ds.longitude.values[0, :])
             ds["x"] = lons
             ds["y"] = ds.latitude.values[:, 0]
+            ds = ds.sortby('x')
+            ds = ds.sortby('y')
 
             logger.debug(f"Longitude range: {ds.x.min().item():.1f} to {ds.x.max().item():.1f}")
 
             # Interpolate to desired grid
-            return ds.interp(y=self.coords["latitude"], x=self.coords["longitude"])
+            if self.config["create_full_files"]:
+                self.coords['latitude'] = ds.y
+                self.coords["longitude"] = ds.x
+                self.lats = ds.y.values
+                self.lons = ds.x.values
+                return ds
+            
+            else:
+                return ds.interp(y=self.coords["latitude"], x=self.coords["longitude"])
 
         except Exception as e:
             logger.error(f"Error reading file {filename}: {e}")
@@ -380,7 +403,7 @@ class GDASProcessor:
             ozone.var_desc = "OMI Ozone Column Density"
 
             # Write data
-            ozone[0, 0, :, :] = data
+            ozone[0, 0, :, :] = data.squeeze()
 
             # Add file description
             nc.FILEDESC = "CMAQ subset of OMI Satellite Observations"
@@ -390,10 +413,12 @@ class GDASProcessor:
         Write ASCII .dat format output files following CMAQ OMI format
         """
         import numpy as np
+        import calendar
 
         outfile = Path(self.config["output_dir"]) / f"gdas_cmaq_{date:%Y%m%d}.dat"
 
-        year_frac = date.year + (date.timetuple().tm_yday - 1) / 365.0
+        num_days = 366 if calendar.isleap(date.year) else 365
+        year_frac = round(date.year + (date.timetuple().tm_yday) / num_days, 4)
 
         # Write header
         with open(outfile, "w") as f:
@@ -401,9 +426,9 @@ class GDASProcessor:
             f.write(f"nlon      {len(self.lons)}\n")
 
             # Write column headers
-            f.write("yeardate latitude ")
+            f.write("yeardate latitude  ")
             for lon in self.lons:
-                f.write(f"{lon:7.2f}")
+                f.write(f"{lon:7.1f}  ")
             f.write("\n")
 
             # Write data rows from north to south
@@ -417,7 +442,11 @@ class GDASProcessor:
                         f.write("     *")  # Missing value indicator
                     else:
                         value = int(round(data[i, j]))
-                        f.write(f"{value:6d}")
+                        if j == 0:
+                            f.write(f"{value:8d}")
+                        else:
+                            f.write(f"{value:9d}")
+                            
                 f.write("\n")
 
         logger.info(f"Successfully wrote ASCII file: {outfile}")
@@ -432,13 +461,12 @@ class GDASProcessor:
         input_dir = Path(self.config["input_dir"])
 
         files = []
-        pattern = self.config["gdas"].get("local_pattern", "gdas_{date:%Y%m%d}_{hour:02d}.grib2")
+        resolution = self.config['gdas']["resolution"]
+        res_str = f"{resolution.replace('.', 'p')}"
+        pattern = f"gfs.t*z.pgrb2.{res_str}.anl_{date:%Y%m%d}"  # Modified pattern
 
-        for hour in self.config["gdas"]["hours"]:
-            filename = pattern.format(date=date, hour=hour)
-            file_path = input_dir / filename
-            if file_path.exists():
-                files.append(file_path)
+        for file in input_dir.glob(pattern):
+            files.append(file)
 
         if not files:
             raise FileNotFoundError(
@@ -459,7 +487,6 @@ class GDASProcessor:
 
         date = self.config["date"].date()
         data = daily_ds.values  # Get numpy array of data values
-
         logger.info(f"Writing netCDF file for {date}")
         self.write_cmaq_format(date, data)
 
@@ -476,17 +503,24 @@ class GDASProcessor:
         """Download a single GDAS file"""
         import requests
 
+        # Get resolution and format for URL
+        resolution = self.config.get("resolution", "0.25")
+        res_str = resolution.replace('.', 'p')  # Convert 0.25 to 0p25 format
+
         file_pattern = self.config["gdas"]["file_pattern"]
-        filename = file_pattern.format(hour=hour)
-        outfile = outdir / f"gdas_{date:%Y%m%d}_{hour:02d}.grib2"
+        filename = file_pattern.format(hour=hour, resolution=res_str)
+
+        # Save with date appended to filename
+        outfile = outdir / f"{filename}_{date:%Y%m%d}"
 
         # Skip if file already exists
         if outfile.exists():
             logger.debug(f"File already exists: {outfile}")
             return outfile
 
-        # Construct URL using AWS S3 pattern
-        url = f"{self.config['gdas']['base_url']}/gfs.{date:%Y%m%d}/" f"{hour:02d}/atmos/{filename}"
+        # Construct URL using AWS S3 pattern with resolution
+        url = (f"{self.config['gdas']['base_url']}/gfs.{date:%Y%m%d}/"
+               f"{hour:02d}/atmos/{filename}")
 
         logger.info(f"Downloading {url}")
 
@@ -609,13 +643,9 @@ def combine_dat_files(directory: Path, output_file: Path):
         output_file (Path): Path where combined file should be written
 
     Notes:
-        - Preserves header from first file
+        - Preserves complete header including yeardate and latitude
         - Maintains chronological order of data
         - Assumes consistent format across input files
-        - Skips duplicate headers from individual files
-
-    Example:
-        >>> combine_dat_files(Path('./output'), Path('./output/combined.dat'))
     """
     # Find all .dat files in directory
     dat_files = sorted(directory.glob("gdas_cmaq_*.dat"))
@@ -627,14 +657,11 @@ def combine_dat_files(directory: Path, output_file: Path):
 
     # Read and combine files
     with open(output_file, "w") as outf:
-        # Copy header from first file (only need once)
+        # Copy complete header from first file
         with open(dat_files[0]) as f:
-            header_lines = []
-            for i in range(3):  # Read first 3 lines (header)
+            for i in range(3):  # Read all 3 header lines
                 line = f.readline()
-                if i < 2:  # Only write nlat/nlon lines
-                    outf.write(line)
-                header_lines.append(line)
+                outf.write(line)
 
         # Process all files
         for dat_file in dat_files:
